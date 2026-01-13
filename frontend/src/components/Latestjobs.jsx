@@ -1,5 +1,5 @@
 import React from 'react'
-import LatestJobCards from './LatestJobCards';
+import LatestJobCards from './LatestjobCards';
 import { useSelector } from 'react-redux'; 
 import store from '@/redux/store';
 
