@@ -19,24 +19,6 @@ export const register = async (req, res) => {
             });
         }
 
-        let profilePhotoUrl = null;
-
-        if (req.file) {
-            const fileUri = getDataUri(req.file);
-
-            const cloudResponse = await cloudinary.uploader.upload(
-                fileUri.content,
-                {
-                    resource_type: "raw",   // ✅ REQUIRED
-                    folder: "resumes"       // optional
-                }
-            );
-
-            user.profile.resume = cloudResponse.secure_url;
-            user.profile.resumeOriginalName = req.file.originalname;
-        }
-
-
         if (role.toLowerCase() === "student" && !collegeemail) {
             return res.status(400).json({
                 message: "College email is required for students",
@@ -54,6 +36,23 @@ export const register = async (req, res) => {
 
         const hashedpw = await bcrypt.hash(pw, 10);
 
+        let profilePhotoUrl = null;
+        let resumeUrl = null;
+        let resumeOriginalName = null;
+
+        if (req.file) {
+            const fileUri = getDataUri(req.file);
+            const cloudResponse = await cloudinary.uploader.upload(
+                fileUri.content,
+                {
+                    resource_type: "auto"
+                }
+            );
+
+            resumeUrl = cloudResponse.secure_url;
+            resumeOriginalName = req.file.originalname;
+        }
+
         const newUser = await User.create({
             fullname,
             email,
@@ -62,7 +61,9 @@ export const register = async (req, res) => {
             role,
             ...(role.toLowerCase() === "student" && { collegeemail }),
             profile: {
-                profilePhoto: profilePhotoUrl
+                profilePhoto: profilePhotoUrl,
+                resume: resumeUrl,
+                resumeOriginalName
             }
         });
 
@@ -80,6 +81,7 @@ export const register = async (req, res) => {
         });
     }
 };
+
 
 
 export const login = async (req, res) => {
