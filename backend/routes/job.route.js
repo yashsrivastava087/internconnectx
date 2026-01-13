@@ -12,8 +12,8 @@ import isauthenticated from "../middlewares/isauthenticated.js";import {
 const router = express.Router();
 
 router.route("/post").post(isauthenticated, postjob);
-router.route("/get").get(isauthenticated, getAlljobs);
-router.route("/get/:id").get(isauthenticated, getJobById);
+router.route("/get").get(getAlljobs);
+router.route("/get/:id").get(getJobById);
 router.route("/getadminjobs").get(isauthenticated, getadminjobs);
 router.route("/delete/:id").delete(isauthenticated, deleteJob);
 
