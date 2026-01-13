@@ -2,7 +2,7 @@ import Job from "../models/job.js";
 
 export const postjob = async (req, res) => {
   try {
-    const { title, description, requirements, salary, Jobtype, position, companyId, experience, location } = req.body;
+    const { title, description, requirements, salary, jobType, position, companyId, experience, location } = req.body;
     const userId = req.id;
 
     const requiredFields = [
@@ -10,7 +10,7 @@ export const postjob = async (req, res) => {
       'description',
       'requirements',
       'salary',
-      'Jobtype',
+      'jobType',
       'position',
       'companyId',
       'experience',
@@ -31,9 +31,9 @@ export const postjob = async (req, res) => {
       title,
       description,
       requirements: requirements.split(","),
-      salary: Number(salary),
+      salary,
       location, 
-      Jobtype,
+      jobType,
       experience: Number(experience), 
       position,
       company: companyId,
@@ -84,7 +84,7 @@ export const getAlljobs = async (req, res) => {
 export const getJobById = async (req, res) => {
   try {
     const jobId = req.params.id;
-    const job = await Job.findById(jobId);
+    const job = await Job.findById(jobId).populate({ path: "applications" });
     if (!job) {
       return res.status(404).json({ // Changed status to 404
         message: "Job not found",
@@ -114,3 +114,41 @@ export const getadminjobs = async (req, res) => {
     res.status(500).json({ message: "Server error", success: false });
   }
 }
+
+export const deleteJob = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const userId = req.id;
+
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found",
+        success: false
+      });
+    }
+
+    // 🔐 Authorization check
+    if (job.created_by.toString() !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this job",
+        success: false
+      });
+    }
+
+    await Job.findByIdAndDelete(jobId);
+
+    return res.status(200).json({
+      message: "Job deleted successfully",
+      success: true
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Server error",
+      success: false
+    });
+  }
+};

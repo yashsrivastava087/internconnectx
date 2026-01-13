@@ -20,7 +20,11 @@ const Jobmodel = new mongoose.Schema({
     type: Number,
     required: true
   },
-  Jobtype: {
+  location: {
+    type: String,
+    required: true
+  },
+  jobType: {
     type: String,
     required: true
   },

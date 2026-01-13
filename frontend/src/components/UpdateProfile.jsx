@@ -35,37 +35,45 @@ const UpdateProfile = ({ open, setOpen }) => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+
         const formData = new FormData();
         formData.append("fullname", input.fullname);
         formData.append("email", input.email);
         formData.append("phonenumber", input.phonenumber);
         formData.append("bio", input.bio);
-        formData.append("skills", input.skills);
+        formData.append(
+            "skills",
+            input.skills.split(",").map(skill => skill.trim())
+        );
+
         if (input.file) {
             formData.append("file", input.file);
         }
+
         try {
             setLoading(true);
-            const res = await axios.post(`${USER_API_END_POINT}/updateprofile`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                },
-                withCredentials: true
-            });
+
+            const res = await axios.post(
+                `${USER_API_END_POINT}/updateprofile`,
+                formData,
+                { withCredentials: true }
+            );
 
             if (res.data.success) {
                 dispatch(setUser(res.data.user));
                 toast.success(res.data.message);
+                setOpen(false); // ✅ close only on success
             }
+
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message);
+            toast.error(
+                error?.response?.data?.message || "Profile update failed"
+            );
         } finally {
             setLoading(false);
         }
-        setOpen(false);
-        console.log(input);
-    }
+    };
 
 
 
